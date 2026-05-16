@@ -28,6 +28,12 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://envforge:envforge_dev_secret@localhost:5432/envforge"
     )
 
+    # ── Redis ─────────────────────────────────────────────────
+    # If set, the rate limiter will use Redis instead of in-memory storage.
+    # Required in production for multi-worker correctness.
+    # Format: redis://:password@host:port/db  or  redis://host:port/db
+    redis_url: str | None = None
+
     # ── CORS ─────────────────────────────────────────────────
     allowed_origins: str = "http://localhost:3000"
 
