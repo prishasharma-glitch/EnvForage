@@ -44,7 +44,7 @@ async def troubleshoot(
     try:
         async def event_generator():
             try:
-                async for chunk in _service.stream_troubleshoot(request):
+                async for chunk in _service.stream_troubleshoot(request, db):
                     # Format as standard SSE
                     yield f"data: {chunk}\n\n"
             except Exception as exc:
