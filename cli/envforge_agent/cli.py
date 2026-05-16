@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
+import platform
 from pathlib import Path
 
 import click
@@ -27,14 +28,18 @@ from envforge_agent.schemas import DiagnosticReport
 console = Console()
 err_console = Console(stderr=True, style="bold red")
 
-
+def check_macos_support():
+    if platform.system() == "Darwin":
+        err_console.print("[ERROR] EnvForge is not currently supported on macOS.")
+        err_console.print("  Hint: This tool is designed for Linux and Windows (WSL) environments.")
+        sys.exit(1)
 # ── Root command group ─────────────────────────────────────────────────────────
 
 @click.group()
 @click.version_option(__version__, prog_name="envforge-agent")
 def cli() -> None:
     """EnvForge CLI Diagnostic Agent — inspect your ML environment."""
-
+    check_macos_support()
 
 # ── envforge diagnose ──────────────────────────────────────────────────────────
 
