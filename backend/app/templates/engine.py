@@ -33,7 +33,7 @@ PROFILE_VERIFY_TEMPLATES: dict[str, str] = {
     "tf-gpu":              "verify_tf.sh",
     "yolov8":              "verify_torch.sh",
     "stable-diffusion":    "verify_torch.sh",
-    "opencv-cpu":          "verify_opencv.sh",
+    "opencv-beginner":     "verify_opencv.sh",
 }
 
 def _build_jinja_env() -> Environment:
