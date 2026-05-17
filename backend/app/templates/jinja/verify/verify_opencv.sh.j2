@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+echo "=== Verifying OpenCV Environment ==="
+
+# Check if Python 3 is available
+if ! command -v python3 &> /dev/null; then
+    echo "ERROR: python3 could not be found"
+    exit 1
+fi
+
+# Run embedded Python snippet to verify opencv and numpy
+python3 -c "
+try:
+    import cv2
+    import numpy as np
+    print(f'OK: OpenCV version {cv2.__version__} imported successfully.')
+    
+    # Simple functional test: Create a small array and convert color
+    img = np.zeros((10, 10, 3), dtype=np.uint8)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    print('OK: Basic OpenCV functions are working fine.')
+except ImportError as e:
+    print(f'ERROR: Failed to import required modules. {e}')
+    exit(1)
+except Exception as e:
+    print(f'ERROR: OpenCV function test failed. {e}')
+    exit(1)
+"
+
+echo "=== OpenCV Verification Completed Successfully ==="
