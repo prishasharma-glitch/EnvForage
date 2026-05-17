@@ -7,6 +7,15 @@ from fastapi import APIRouter
 from app.api.deps import DB
 from app.models.diagnostic import DiagnosticReport
 from app.schemas.diagnostic import CompatibilityIssue, DiagnoseResponse, DiagnosticReportSchema
+from app.compatibility.errors import (
+    IncompatibilityError,
+    UnknownVersionError,
+    UnsupportedOSError,
+)
+from app.compatibility.models import PackageConstraint
+from app.compatibility.resolver import CompatibilityResolver
+from app.schemas.profile import ProfileFilters
+from app.services.profile_service import list_profiles
 
 router = APIRouter()
 
@@ -36,48 +45,68 @@ async def diagnose(
     db.add(db_report)
     await db.flush()
 
-    # TODO: Phase 2 — Run full compatibility analysis against all profiles
-    # For Phase 1, return a basic analysis based on CUDA version
     issues: list[CompatibilityIssue] = []
     compatible_profiles: list[str] = []
     recommendations: list[str] = []
 
-    cuda_ver = report.cuda.version if report.cuda else None
+    profiles, _ = await list_profiles(db, ProfileFilters())
+    resolver = CompatibilityResolver()
 
-    if cuda_ver:
-        from app.compatibility.matrix.cuda import CUDA_MATRIX
-        if cuda_ver not in CUDA_MATRIX:
-            issues.append(CompatibilityIssue(
-                severity="WARNING",
-                component="cuda",
-                message=f"CUDA {cuda_ver} is not in EnvForge's validated matrix.",
-                suggested_fix=f"Supported CUDA versions: {', '.join(CUDA_MATRIX.keys())}",
-                docs_url="https://docs.nvidia.com/cuda/",
-            ))
-        else:
-            compatible_profiles.extend(["pytorch-cuda", "yolov8", "stable-diffusion", "llm-finetune"])
-            recommendations.append(f"pytorch-cuda with CUDA {cuda_ver}")
-    elif report.rocm.version:
-        rocm_ver = report.rocm.version
-        from app.compatibility.matrix.rocm import ROCM_MATRIX
-        if rocm_ver not in ROCM_MATRIX:
-            issues.append(CompatibilityIssue(
-                severity="WARNING",
-                component="rocm",
-                message=f"ROCm {rocm_ver} is not in EnvForge's validated matrix.",
-                suggested_fix=f"Supported ROCm versions: {', '.join(ROCM_MATRIX.keys())}",
-                docs_url="https://rocm.docs.amd.com/en/latest/",
-            ))
-        else:
-            compatible_profiles.extend(["pytorch-rocm", "yolov8"])
-            recommendations.append(f"pytorch-rocm with ROCm {rocm_ver}")
-    else:
-        compatible_profiles.extend(["opencv-beginner", "yolov8"])
-        recommendations.append("opencv-beginner (CPU-only, no CUDA or ROCm detected)")
+    for profile in profiles:
+        packages = [
+            PackageConstraint(
+                name=package.package_name,
+                version_spec=package.version_spec,
+                cuda_variant=package.cuda_variant,
+                is_optional=package.is_optional,
+                install_order=package.install_order,
+            )
+            for package in sorted(profile.packages, key=lambda item: item.install_order)
+        ]
 
-    return DiagnoseResponse(
-        report_id=str(db_report.id),
-        compatible_profiles=compatible_profiles,
-        issues=issues,
-        recommendations=recommendations,
-    )
+        try:
+            resolved = resolver.resolve(
+                packages=packages,
+                python_version=report.active_python.version if report.active_python else None,
+                cuda_version=report.cuda.version if report.cuda else None,
+                rocm_version=report.rocm.version if report.rocm else None,
+                target_os=report.os.name.split()[0].upper()[:5] if report.os else None,
+                profile_slug=profile.slug,
+                os_support=profile.os_support,
+                cuda_required=profile.cuda_required,
+                rocm_required=profile.rocm_required,
+            )
+
+            compatible_profiles.append(profile.slug)
+
+            if resolved.warnings:
+                recommendations.extend(resolved.warnings)
+
+        except IncompatibilityError as exc:
+            issues.append(
+                CompatibilityIssue(
+                    severity="ERROR",
+                    component=exc.component,
+                    message=str(exc),
+                    suggested_fix=exc.suggestion,
+                    docs_url=exc.docs_url,
+                )
+            )
+
+        except (UnknownVersionError, UnsupportedOSError) as exc:
+            issues.append(
+                CompatibilityIssue(
+                    severity="ERROR",
+                    component="compatibility",
+                    message=str(exc),
+                    suggested_fix=None,
+                    docs_url=None,
+                )
+            )
+
+        return DiagnoseResponse(
+            report_id=str(db_report.id),
+            compatible_profiles=compatible_profiles,
+            issues=issues,
+            recommendations=recommendations,
+        )
