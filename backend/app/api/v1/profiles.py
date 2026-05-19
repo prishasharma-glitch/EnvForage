@@ -1,8 +1,9 @@
 """Profile endpoints — GET /api/v1/profiles and /api/v1/profiles/{slug}."""
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.deps import DB
 from app.schemas.profile import (
+    ProfileCreateSchema,
     ProfileDetailSchema,
     ProfileFilters,
     ProfileListResponse,
@@ -57,3 +58,42 @@ async def get_profile(slug: str, db: DB) -> ProfileDetailSchema:
             },
         )
     return ProfileDetailSchema.model_validate(profile)
+
+
+@router.post("/profiles", response_model=ProfileDetailSchema, status_code=status.HTTP_201_CREATED)
+async def create_profile(profile_in: ProfileCreateSchema, db: DB) -> ProfileDetailSchema:
+    """
+    Create a new environment profile.
+    """
+    try:
+        profile = await profile_service.create_profile(db, profile_in)
+        return ProfileDetailSchema.model_validate(profile)
+    except Exception as e:
+        # Check for unique constraint violation on slug (typically IntegrityError but we catch Exception to be safe for this test)
+        if "unique constraint" in str(e).lower() or "duplicate key" in str(e).lower() or "unique" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A profile with this slug already exists."
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+@router.delete("/profiles/{slug}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_profile(slug: str, db: DB):
+    """
+    Soft delete a profile by slug.
+    """
+    deleted = await profile_service.delete_profile(db, slug)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error": {
+                    "code": "PROFILE_NOT_FOUND",
+                    "message": f"Profile '{slug}' not found",
+                }
+            },
+        )

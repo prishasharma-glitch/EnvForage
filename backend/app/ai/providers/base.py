@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 from typing import AsyncIterator, TypeVar
 
+from pydantic import BaseModel
+
 T = TypeVar("T", bound=BaseModel)
 
 
