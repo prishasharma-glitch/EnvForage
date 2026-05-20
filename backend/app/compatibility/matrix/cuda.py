@@ -63,6 +63,24 @@ CUDA_MATRIX: dict[str, CUDAMatrixEntry] = {
         notes="Latest stable. Required for PyTorch 2.3+.",
         source_url="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
     ),
+    "12.5": CUDAMatrixEntry(
+        cuda_version="12.5",
+        min_driver_linux="555.42.02",
+        min_driver_windows="555.85",
+        cudnn_versions=["9.2.0", "9.3.0"],
+        supported_archs=["sm_50", "sm_60", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
+        notes="Improved Ada Lovelace support. Required for PyTorch 2.4+.",
+        source_url="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
+    ),
+    "12.6": CUDAMatrixEntry(
+        cuda_version="12.6",
+        min_driver_linux="560.35.03",
+        min_driver_windows="560.94",
+        cudnn_versions=["9.3.0", "9.5.0"],
+        supported_archs=["sm_50", "sm_60", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
+        notes="Latest stable release. Broad Ada Lovelace (RTX 40xx) support.",
+        source_url="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
+    ),
 }
 
 # Ordered list for display / validation purposes
@@ -89,6 +107,7 @@ FRAMEWORK_CUDA_SUPPORT: dict[str, dict[str, list[str]]] = {
         "2.3.0": ["11.8", "12.1"],
         "2.3.1": ["11.8", "12.1"],
         "2.4.0": ["11.8", "12.1", "12.4"],
+        "2.5.0": ["12.1", "12.4", "12.6"],
     },
     "tensorflow": {
         # TensorFlow uses XLA CUDA support — often lags behind PyTorch
@@ -110,6 +129,7 @@ FRAMEWORK_CUDA_SUPPORT: dict[str, dict[str, list[str]]] = {
         "0.4.25": ["11.8", "12.1", "12.3"],
         "0.4.26": ["12.1"],
         "0.4.28": ["12.1", "12.4"],
+        "0.4.30": ["12.1", "12.4", "12.6"],
     },
 }
 
