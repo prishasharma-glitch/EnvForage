@@ -69,7 +69,7 @@ CUDA_MATRIX: dict[str, CUDAMatrixEntry] = {
         min_driver_windows="555.85",
         cudnn_versions=["9.2.0", "9.3.0"],
         supported_archs=["sm_50", "sm_60", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
-        notes="Supports Blackwell architecture (sm_100). Required for PyTorch 2.4+.",
+        notes="Improved Ada Lovelace support. Required for PyTorch 2.4+.",
         source_url="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
     ),
     "12.6": CUDAMatrixEntry(
@@ -78,7 +78,7 @@ CUDA_MATRIX: dict[str, CUDAMatrixEntry] = {
         min_driver_windows="560.94",
         cudnn_versions=["9.3.0", "9.5.0"],
         supported_archs=["sm_50", "sm_60", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
-        notes="Latest release. Broad Blackwell and Ada Lovelace support.",
+        notes="Latest stable release. Broad Ada Lovelace (RTX 40xx) support.",
         source_url="https://docs.nvidia.com/cuda/cuda-toolkit-release-notes/",
     ),
 }
