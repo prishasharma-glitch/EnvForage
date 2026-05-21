@@ -71,6 +71,4 @@ All commands output `DiagnosticReport` JSON compatible with `POST /api/v1/diagno
 
 For common CLI, API, and environment issues, see:
 
-```txt
-docs/TROUBLESHOOTING.md
-```
+`../TROUBLESHOOTING.md`
