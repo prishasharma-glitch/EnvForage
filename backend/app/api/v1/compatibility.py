@@ -4,6 +4,7 @@ Exposes CUDA, ROCm, and Python compatibility matrices as read-only REST endpoint
 Resolves Issue #85.
 """
 from dataclasses import asdict
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
@@ -24,7 +25,7 @@ router = APIRouter(prefix="/compatibility")
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 @router.get("", summary="Summary of all compatibility matrices")
-async def get_compatibility_summary() -> dict:
+async def get_compatibility_summary() -> dict[str, Any]:
     """
     Returns a high-level summary of all available compatibility matrices.
     Useful for frontend dropdowns and dynamic table headers.
@@ -55,7 +56,7 @@ async def get_compatibility_summary() -> dict:
 # ── CUDA ──────────────────────────────────────────────────────────────────────
 
 @router.get("/cuda", summary="List all CUDA compatibility entries")
-async def get_cuda_matrix() -> dict:
+async def get_cuda_matrix() -> dict[str, Any]:
     """
     Returns the full CUDA compatibility matrix.
     Each entry maps a CUDA version to its minimum required NVIDIA driver
@@ -69,7 +70,7 @@ async def get_cuda_matrix() -> dict:
     }
 
 @router.get("/cuda/frameworks", summary="List framework → CUDA version support map")
-async def get_framework_cuda_support() -> dict:
+async def get_framework_cuda_support() -> dict[str, Any]:
     """
     Returns the framework → CUDA version support map.
     Shows which CUDA versions each framework version officially supports.
@@ -80,7 +81,7 @@ async def get_framework_cuda_support() -> dict:
     }
 
 @router.get("/cuda/{cuda_version}", summary="Get a single CUDA version entry")
-async def get_cuda_version(cuda_version: str) -> dict:
+async def get_cuda_version(cuda_version: str) -> dict[str, Any]:
     """
     Returns the compatibility entry for a specific CUDA version.
     - **cuda_version**: e.g. `11.8`, `12.1`, `12.4`
@@ -102,7 +103,7 @@ async def get_cuda_version(cuda_version: str) -> dict:
 # ── ROCm ──────────────────────────────────────────────────────────────────────
 
 @router.get("/rocm", summary="List all ROCm compatibility entries")
-async def get_rocm_matrix() -> dict:
+async def get_rocm_matrix() -> dict[str, Any]:
     """
     Returns the full ROCm compatibility matrix.
     Each entry maps a ROCm version to its minimum required Linux driver version
@@ -116,7 +117,7 @@ async def get_rocm_matrix() -> dict:
     }
 
 @router.get("/rocm/frameworks", summary="List framework → ROCm version support map")
-async def get_framework_rocm_support() -> dict:
+async def get_framework_rocm_support() -> dict[str, Any]:
     """
     Returns the framework → ROCm version support map.
     Shows which ROCm versions each framework version officially supports.
@@ -127,7 +128,7 @@ async def get_framework_rocm_support() -> dict:
     }
 
 @router.get("/rocm/{rocm_version}", summary="Get a single ROCm version entry")
-async def get_rocm_version(rocm_version: str) -> dict:
+async def get_rocm_version(rocm_version: str) -> dict[str, Any]:
     """
     Returns the compatibility entry for a specific ROCm version.
     - **rocm_version**: e.g. `5.7.0`, `6.0.0`
@@ -149,7 +150,7 @@ async def get_rocm_version(rocm_version: str) -> dict:
 # ── Python ────────────────────────────────────────────────────────────────────
 
 @router.get("/python", summary="List all Python compatibility entries")
-async def get_python_matrix() -> dict:
+async def get_python_matrix() -> dict[str, Any]:
     """
     Returns the full Python compatibility matrix.
     Each framework maps to a list of versioned entries showing supported
@@ -165,7 +166,7 @@ async def get_python_matrix() -> dict:
     }
 
 @router.get("/python/{framework}", summary="Get Python compatibility for a specific framework")
-async def get_python_framework(framework: str) -> dict:
+async def get_python_framework(framework: str) -> dict[str, Any]:
     """
     Returns all versioned Python compatibility entries for a given framework.
     - **framework**: e.g. `torch`, `tensorflow`, `ultralytics`
@@ -189,7 +190,7 @@ async def get_python_framework(framework: str) -> dict:
     }
 
 @router.get("/python/{framework}/{version}", summary="Get Python compatibility for a specific framework version")
-async def get_python_framework_version(framework: str, version: str) -> dict:
+async def get_python_framework_version(framework: str, version: str) -> dict[str, Any]:
     """
     Returns the Python compatibility entry for a specific framework version.
     - **framework**: e.g. `torch`, `tensorflow`
