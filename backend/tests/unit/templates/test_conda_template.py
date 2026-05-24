@@ -186,3 +186,5 @@ def test_conda_template_cpu_only_no_gpu_channels():
     renderer = TemplateRenderer()
     result = renderer.render("environment.yml", context)
     assert _extract_channels(result.content) == ["conda-forge", "defaults"]
+
+    
